@@ -19,8 +19,29 @@ const users = [
     {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
 ]
 
+const plants = [
+    {
+        id: 1,
+        name: 'Võilill',
+        description: 'See on võilill',
+        userId: 1
+    },
+    {
+        id: 2,
+        name: 'Vereurmarohi',
+        description: 'See on vereurmarohi',
+        userId: 2
+    },
+    {
+        id: 3,
+        name: 'Nõges',
+        description: 'See on nõges',
+        userId: 1
+    },
+]
+
 let sessions = [
-     // {id: '123', userId: 1}
+      {id: '123', userId: 1}
 ]
 
 function tryToParseJson(jsonString) {
@@ -141,6 +162,14 @@ function authorizeRequest(req, res, next) {
 
 }
 
+app.get('/plants', authorizeRequest, (req, res) => {
+
+    // get plants for user
+    const plantsForUser = plants.filter(plant => plant.userId === req.user.id)
+
+    res.send(plantsForUser)
+
+})
 app.delete('/sessions', authorizeRequest, (req, res) => {
 
     // Remove session from sessions array

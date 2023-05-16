@@ -24,6 +24,27 @@
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="msapplication-config" content="/icons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
+    <style>
+
+        #plant-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 1rem;
+            grid-auto-rows: minmax(100px, auto);
+        }
+
+        .plant-card {
+            background-color: #cbe2cb;
+            border: 1px solid #dee2e6;
+            border-radius: .55rem;
+            padding: 1rem;
+        }
+
+        .plant-card:hover {
+            background-color: #7f9d61;
+        }
+
+    </style>
 </head>
 <body>
 
@@ -35,19 +56,29 @@
         <div class="text-center mt-5">
             <h1>Plant Tracker</h1>
             <p class="lead">This is a simple plant tracking app</p>
-            <div class="row">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" v-if="!sessionId"
+            <div class="column">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" v-if="!sessionId"
                         @click="showModal('signUpModal')">
                     Sign Up
                 </button>
                 &nbsp;
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" v-if="!sessionId"
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" v-if="!sessionId"
                         @click="showModal('signInModal')">
                     Sign In
                 </button>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" v-if="sessionId" @click="signOut">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" v-if="sessionId" @click="signOut">
                     Sign Out
                 </button>
+            </div>
+
+            &nbsp;
+
+    <!--List of plants-->
+            <div id="plant-list">
+                <div v-for="plant in plants" class="plant-card">
+                    {{ plant.name }}<br>
+                   {{ plant.description }}<br>
+                </div>
             </div>
         </div>
     </div>
@@ -136,15 +167,28 @@
                 signUpPassword: null,
                 signInEmail: null,
                 signInPassword: null,
-                sessionId: null
+                sessionId: null,
+                plants: null
             }
         },
         mounted() {
             // Check if the user is already signed in from local storage
             this.sessionId = localStorage.getItem('sessionId')
 
+            // If the user is signed in, get the list of plants
+            if (this.sessionId) {
+                this.getPlants()
+            }
+
         },
         methods: {
+            getPlants() {
+                this.send('GET', '/plants').then(response => {
+                    if (response.ok) {
+                        this.plants = response.body
+                    }
+                })
+            },
             showModal: function (modalId) {
                 this.modalHandler = new bootstrap.Modal(document.getElementById(modalId), {
                     keyboard: false
@@ -216,6 +260,9 @@
 
                     // Close the modal
                     this.modalHandler.hide()
+
+                    // Get the list of plants
+                    this.getPlants()
                 }
             },
             signOut: async function () {
@@ -230,6 +277,7 @@
             clearStorageAndResetSessionId: function () {
                 localStorage.removeItem('sessionId')
                 this.sessionId = null
+                this.plants = null
             }
         }
     }).mount('#app')

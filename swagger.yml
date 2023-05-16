@@ -117,6 +117,45 @@ paths:
           Bearer: []
       summary: Destroy a Session
       description: 'Destroys a `Session`, signing the user out. Reads the session ID from Authorization header.'
+  /plants:
+    summary: Path used to manage the list of plants.
+    description: >-
+      The REST endpoint/path used to list and create zero or more `Plant` entities.  This path contains
+      a `GET` and `POST` operation to perform the list and create tasks, respectively.
+    get:
+      tags:
+        - /plants
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plant'
+          description: Successful response - returns an array of `Plant` entities.
+        '400':
+          content:
+            text/html:
+              examples:
+                Invalid Authorization header:
+                  value: Invalid Authorization header
+          description: Bad Request
+        '401':
+          content:
+            text/html:
+              examples:
+                Authorization header is missing:
+                  value: Authorization header is missing
+                Invalid session id:
+                  value: Invalid session id
+          description: Unauthorized
+      security:
+        -
+          Bearer: []
+      operationId: getPlants
+      summary: List All Plants
+      description: Gets a list of all `Plant` entities.
 components:
   schemas:
     User:
@@ -166,6 +205,26 @@ components:
       example:
         email: admin
         password: KollneKollne
+    Plant:
+      title: Root Type for Plant
+      description: ''
+      type: object
+      properties:
+        id:
+          format: int32
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        userId:
+          format: int32
+          type: integer
+      example:
+        id: 1
+        name: Võilill
+        description: See on võilill
+        userId: 1
   securitySchemes:
     Bearer:
       scheme: bearer
@@ -176,4 +235,7 @@ tags:
     description: ''
   -
     name: /sessions
+    description: ''
+  -
+    name: /plants
     description: ''
