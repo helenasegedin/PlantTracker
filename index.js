@@ -15,8 +15,14 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.use(express.static('public'))
 app.use(express.json())
 
+// Global error handler
+app.use((error, req, res, next) => {
+    console.error(error)
+    res.status(500).send('Internal server error')
+})
+
 const users = [
-    {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
+   // {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
 ]
 
 const plants = [
@@ -41,7 +47,7 @@ const plants = [
 ]
 
 let sessions = [
-      {id: '123', userId: 1}
+      // {id: '123', userId: 1}
 ]
 
 function tryToParseJson(jsonString) {
@@ -177,6 +183,21 @@ app.delete('/sessions', authorizeRequest, (req, res) => {
 
     res.status(204).end()
 
+})
+
+app.post('/plants', authorizeRequest, (req, res) => {
+
+        // Validate name and description
+    if (!req.body.name || !req.body.description) return res.status(400).send('Name and description are required')
+
+    // Find max id
+    const maxId = plants.reduce((max, plant) => plant.id > max ? plant.id : max, plants[0].id)
+
+    // Save plant to database
+    plants.push({id: maxId + 1, name: req.body.name, description: req.body.description, userId: req.user.id})
+
+    // Send plant to client
+    res.status(201).send(plants[plants.length - 1])
 })
 
 app.listen(port, () => {

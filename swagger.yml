@@ -130,9 +130,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Plant'
+                $ref: '#/components/schemas/Plant'
           description: Successful response - returns an array of `Plant` entities.
         '400':
           content:
@@ -156,6 +154,40 @@ paths:
       operationId: getPlants
       summary: List All Plants
       description: Gets a list of all `Plant` entities.
+    post:
+      requestBody:
+        description: A new `Plant` to be created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plant'
+        required: true
+      tags:
+        - /plants
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plant'
+          description: Successful response
+        '400':
+          content:
+            text/html:
+              examples:
+                Please enter a name:
+                  value: Please enter a name
+                Please enter a description:
+                  value: Please enter a description
+                Name is too long:
+                  value: Name is too long
+          description: Client side error
+      security:
+        -
+          Bearer: []
+      operationId: postPlant
+      summary: Add a Plant
+      description: Creates a new instance of a `Plant`.
 components:
   schemas:
     User:
@@ -212,14 +244,22 @@ components:
       properties:
         id:
           format: int32
+          description: A field that represents the unique identifier of the entity.
           type: integer
+          example: '123'
         name:
+          description: A field that represents the name of the entity
           type: string
+          example: Võilill
         description:
+          description: A field that represents the description of the entity
           type: string
+          example: See on võilill.
         userId:
           format: int32
+          description: A field that represents the unique identifier of the user that the entity belongs to
           type: integer
+          example: '12345'
       example:
         id: 1
         name: Võilill
