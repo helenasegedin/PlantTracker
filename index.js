@@ -16,7 +16,7 @@ app.use(express.static('public'))
 app.use(express.json())
 
 // Global error handler
-app.use((error, req, res) => {
+app.use((error, req, res, next) => {
     console.error(error)
     res.status(500).send('Internal server error')
 })
@@ -95,7 +95,7 @@ app.post('/users', async (req, res) => {
     }
 
     // Find max id
-    const maxId = users.reduce((max, user) => user.id > max ? user.id : max, users[0].id)
+    const maxId = users.reduce((maxId, user) => user.id > maxId ? user.id : maxId, 0)
 
     // Save user to database
     console.log(hashedPassword)
