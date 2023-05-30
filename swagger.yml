@@ -188,6 +188,42 @@ paths:
       operationId: postPlant
       summary: Add a Plant
       description: Creates a new instance of a `Plant`.
+  '/plants/:id':
+    summary: Path used to manage individual plant records.
+    delete:
+      tags:
+        - '/plants/:id'
+      responses:
+        '204':
+          description: Successful response
+        '401':
+          content:
+            text/html:
+              examples:
+                Authorization header is missing:
+                  value: Authorization header is missing
+                Invalid session id:
+                  value: Invalid session id
+          description: Unauthorized
+        '403':
+          content:
+            text/html:
+              examples:
+                Forbidden:
+                  value: Forbidden
+          description: '`Plant` does not belong to the user'
+        '404':
+          content:
+            text/html:
+              examples:
+                Plant not found:
+                  value: Plant not found
+          description: '`Plant` not found in database'
+      security:
+        -
+          Bearer: []
+      summary: Delete a Plant
+      description: Deletes a `Plant` record that the user has saved.
 components:
   schemas:
     User:
@@ -278,4 +314,7 @@ tags:
     description: ''
   -
     name: /plants
+    description: ''
+  -
+    name: '/plants/:id'
     description: ''

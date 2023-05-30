@@ -16,13 +16,13 @@ app.use(express.static('public'))
 app.use(express.json())
 
 // Global error handler
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
     console.error(error)
     res.status(500).send('Internal server error')
 })
 
 const users = [
-   // {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
+    {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
 ]
 
 const plants = [
@@ -47,7 +47,7 @@ const plants = [
 ]
 
 let sessions = [
-      // {id: '123', userId: 1}
+       {id: '123', userId: 1}
 ]
 
 function tryToParseJson(jsonString) {
@@ -198,6 +198,22 @@ app.post('/plants', authorizeRequest, (req, res) => {
 
     // Send plant to client
     res.status(201).send(plants[plants.length - 1])
+})
+
+app.delete('/plants/:id', authorizeRequest, (req, res) => {
+
+        // Find plant in database
+        const plant = plants.find(plant => plant.id === parseInt(req.params.id))
+        if (!plant) return res.status(404).send('Plant not found')
+
+        // Check that the plant belongs to the user
+        if (plant.userId !== req.user.id) return res.status(403).send('Forbidden')
+
+        // Remove plant from plants array
+        plants.splice(plants.indexOf(plant), 1)
+
+        res.status(204).end()
+
 })
 
 app.listen(port, () => {
