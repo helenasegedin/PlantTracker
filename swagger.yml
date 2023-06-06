@@ -15,6 +15,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
+            examples:
+              User:
+                value:
+                  email: email@example.com
+                  password: pass123
         required: true
       tags:
         - /users
@@ -161,6 +166,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Plant'
+            examples:
+              Plant:
+                value:
+                  name: Võilill
+                  description: See on võilill
+                  userId: 1
         required: true
       tags:
         - /plants
@@ -190,6 +201,49 @@ paths:
       description: Creates a new instance of a `Plant`.
   '/plants/:id':
     summary: Path used to manage individual plant records.
+    put:
+      requestBody:
+        description: An existing `Plant` to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plant'
+        required: true
+      tags:
+        - '/plants/:id'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plant'
+          description: Successful response
+        '400':
+          content:
+            text/html:
+              examples:
+                Name and description are required:
+                  value: Name and description are required
+          description: Client side error
+        '403':
+          content:
+            text/html:
+              examples:
+                Plant does not belong to the user:
+                  value: Plant does not belong to the user
+          description: '`Plant` does not belong to the user'
+        '404':
+          content:
+            text/html:
+              examples:
+                Plant not found:
+                  value: Plant not found
+          description: '`Plant` not found in database'
+      security:
+        -
+          Bearer: []
+      summary: Edit a Plant
+      description: Updates a `Plant`record that the user has previously saved.
     delete:
       tags:
         - '/plants/:id'
@@ -244,10 +298,12 @@ components:
           description: A field that represents the password of the user.
           type: string
           example: MySecurePassword123
-      example:
-        id: 3
-        email: email@example.com
-        password: pass123
+      example: |-
+        {
+            "id": 1
+            "email": "email@example.com",
+            "password": "pass123"
+        }
     Session:
       title: Root Type for Session
       description: ''

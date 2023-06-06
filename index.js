@@ -200,6 +200,26 @@ app.post('/plants', authorizeRequest, (req, res) => {
     res.status(201).send(plants[plants.length - 1])
 })
 
+app.put('/plants/:id', authorizeRequest, (req, res) => {
+
+    // Validate name and description
+    if (!req.body.name || !req.body.description) return res.status(400).send('Name and description are required')
+
+    // Find plant in database
+    const plant = plants.find(plant => plant.id === parseInt(req.params.id))
+    if (!plant) return res.status(404).send('Plant not found')
+
+    // Check that the plant belongs to the user
+    if (plant.userId !== req.user.id) return res.status(401).send('Unauthorized')
+
+    // Update plant
+    plant.name = req.body.name
+    plant.description = req.body.description
+
+    // Send plant to client
+    res.send(plant)
+})
+
 app.delete('/plants/:id', authorizeRequest, (req, res) => {
 
         // Find plant in database

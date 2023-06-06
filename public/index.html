@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <meta name="description" content=""/>
-    <meta name="author" content=""/>
+    <meta name="description" content="Plant Tracker"/>
+    <meta name="author" content="Helena Šegedin"/>
 
     <title>Plant Tracker</title>
 
@@ -82,7 +82,13 @@
                 <div v-for="plant in plants" class="plant-card">
                     <div class="card-header d-flex justify-content-between">
                         <button type="button" class="btn-close" aria-label="Close" @click="showModal('deletePlantModal', plant.id)"></button><br>
+                        <div class="row">
+                            <div class="col-6 text-end">
+                                <button type="button" class="btn btn-outline-secondary" @click="showModal('editPlantModal', plant.id)">Edit</button><br>
+                            </div>
+                        </div>
                     </div>
+
                     <h5 class="card-title">{{ plant.name }}</h5>
                     {{ plant.description }}<br>
                 </div>
@@ -199,6 +205,35 @@
         </div>
     </div>
 
+    <!-- Edit Plant Modal -->
+    <div class="modal fade" id="editPlantModal" tabindex="-1" aria-labelledby="editPlantModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editPlantModalLabel">Edit Plant</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="editPlantName" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="editPlantName" v-model="editPlantName">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="editPlantDescription" class="col-sm-2 col-form-label">Description</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" id="editPlantDescription" v-model="editPlantDescription"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="editPlant(plant.id)">Edit Plant</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
@@ -227,6 +262,8 @@
                 plants: null,
                 addPlantName: null,
                 addPlantDescription: null,
+                editPlantName: null,
+                editPlantDescription: null,
             }
         },
         mounted() {
@@ -247,8 +284,13 @@
                     }
                 })
             },
-            showModal: function (modalId, plant) {
-                this.plantToDelete = plant;
+            showModal: function (modalId, Id) {
+                if (Id) {
+                    this.plantToDelete = Id;
+                    this.plant = this.plants.find(plant => plant.id === Id)
+                    this.editPlantName = this.plant.name
+                    this.editPlantDescription = this.plant.description
+                }
                 this.modalHandler = new bootstrap.Modal(document.getElementById(modalId), {
                     keyboard: false
                 })
@@ -341,12 +383,8 @@
             addPlant: function () {
 
                 // Validate the form
-                if (!this.addPlantName) {
-                    alert('Please enter a name')
-                    return
-                }
-                if (!this.addPlantDescription) {
-                    alert('Please enter a description')
+                if (!this.addPlantName || !this.addPlantDescription) {
+                    alert('Please enter a name and description')
                     return
                 }
                 // Validate too long
@@ -362,6 +400,34 @@
                     if (response.ok) {
                         alert('Plant added successfully')
                         this.plants.push(response.body)
+                        this.modalHandler.hide()
+                    }
+                })
+            },
+
+            editPlant: function (plantId) {
+                // Validate the form
+                if (!this.editPlantName || !this.editPlantDescription) {
+                    alert('Please enter a name and description')
+                    return
+                }
+                // Validate too long
+                if (this.editPlantName.length > 100) {
+                    alert('Name is too long')
+                    return
+                }
+                // Send PUT /plants/:id
+                const name = this.editPlantName
+                const description = this.editPlantDescription
+                this.send('PUT', '/plants/' + plantId, {name, description}).then(response => {
+                    if (response.ok) {
+                        alert('Plant edited')
+                        this.plants = this.plants.map(plant => {
+                            if (plant.id === plantId) {
+                                return response.body
+                            }
+                            return plant
+                        })
                         this.modalHandler.hide()
                     }
                 })
