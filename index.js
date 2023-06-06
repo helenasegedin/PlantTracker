@@ -11,9 +11,16 @@ const swaggerUi = require('swagger-ui-express');
 const yamlJs = require('yamljs');
 const swaggerDocument = yamlJs.load('./swagger.yml');
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+const expressWs = require('express-ws')(app);
 
 app.use(express.static('public'))
 app.use(express.json())
+
+app.ws('/', function(ws) {
+    ws.on('message', function(msg) {
+        expressWs.getWss().clients.forEach(client => client.send(msg));
+    });
+});
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -194,7 +201,11 @@ app.post('/plants', authorizeRequest, (req, res) => {
     const maxId = plants.reduce((max, plant) => plant.id > max ? plant.id : max, plants[0].id)
 
     // Save plant to database
-    plants.push({id: maxId + 1, name: req.body.name, description: req.body.description, userId: req.user.id})
+    const plant = {id: maxId + 1, name: req.body.name, description: req.body.description, userId: req.user.id}
+
+    plants.push(plant)
+
+    expressWs.getWss().clients.forEach(client => client.send(JSON.stringify({event: 'create', plant})));
 
     // Send plant to client
     res.status(201).send(plants[plants.length - 1])
@@ -216,6 +227,8 @@ app.put('/plants/:id', authorizeRequest, (req, res) => {
     plant.name = req.body.name
     plant.description = req.body.description
 
+    expressWs.getWss().clients.forEach(client => client.send(JSON.stringify({event: 'update', plant})));
+
     // Send plant to client
     res.send(plant)
 })
@@ -231,6 +244,8 @@ app.delete('/plants/:id', authorizeRequest, (req, res) => {
 
         // Remove plant from plants array
         plants.splice(plants.indexOf(plant), 1)
+
+        expressWs.getWss().clients.forEach(client => client.send(JSON.stringify({event: 'delete', id: plant.id})));
 
         res.status(204).end()
 

@@ -238,7 +238,6 @@
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
 <script>
-
     function tryToParseJSON(jsonString) {
         try {
             const o = JSON.parse(jsonString)
@@ -250,7 +249,7 @@
         return false
     }
 
-    Vue.createApp({
+    const vue = Vue.createApp({
         data() {
             return {
                 modalHandler: null,
@@ -445,6 +444,50 @@
             }
         }
     }).mount('#app')
+
+    // Connect to the websocket
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const connection = new WebSocket(`${protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`)
+
+    // When the connection is open, show a message
+    connection.onopen = function() {
+        console.log('WebSocket connected')
+    }
+
+    connection.onmessage = function(message) {
+        console.log('Received message:', message)
+
+        // Run method based on event
+        message = tryToParseJSON(message.data)
+
+        switch (message.event) {
+            case 'create':
+                vue.plants.push(message.plant)
+                break
+            case 'update':
+                vue.plants = vue.plants.map(plant => {
+                    if (plant.id === message.plant.id) {
+                        return message.plant
+                    }
+                    return plant
+                })
+                break
+            case 'delete':
+                vue.plants = vue.plants.filter(plant => plant.id !== message.id)
+                break
+        }
+    }
+    // Websocket connection closed
+    connection.onclose = function() {
+        console.log('WebSocket connection closed')
+        alert('WebSocket connection closed. Please refresh the page to reconnect.')
+    }
+
+    // Websocket connection error
+    connection.onerror = function(error) {
+        console.log('WebSocket error:', error)
+        alert('WebSocket error. Please refresh the page to reconnect.')
+    }
 </script>
 
 <!-- Bootstrap core JS-->
