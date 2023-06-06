@@ -265,21 +265,25 @@
                 editPlantDescription: null,
             }
         },
-        mounted() {
+        async mounted() {
             // Check if the user is already signed in from local storage
             this.sessionId = localStorage.getItem('sessionId')
 
             // If the user is signed in, get the list of plants
             if (this.sessionId) {
-                this.getPlants()
+                this.getPlantsFromLocalStorage()
+                await this.getPlantsFromServer()
             }
-
         },
         methods: {
-            getPlants() {
-                this.send('GET', '/plants').then(response => {
+            getPlantsFromLocalStorage() {
+                    this.plants = JSON.parse(localStorage.getItem('plants'))
+            },
+            async getPlantsFromServer() {
+                await this.send('GET', '/plants').then(response => {
                     if (response.ok) {
                         this.plants = response.body
+                        localStorage.setItem('plants', JSON.stringify(this.plants))
                     }
                 })
             },
@@ -319,9 +323,9 @@
 
                 const headers = {
                     'Content-Type': 'application/json'
-                };
+                }
                 if (this.sessionId) {
-                    headers.Authorization = "Bearer " + this.sessionId;
+                    headers.Authorization = "Bearer " + this.sessionId
                 }
                 return fetch(url, {
                     method: method,
@@ -361,8 +365,13 @@
                     // Close the modal
                     this.modalHandler.hide()
 
-                    // Get the list of plants
-                    this.getPlants()
+                    // Get the list of plants from localStorage
+                    this.getPlantsFromLocalStorage()
+                    alert('Showing cached data from your previous session')
+
+                    await this.getPlantsFromServer()
+                    alert('Data updated from the server')
+
                 }
             },
             signOut: async function () {
@@ -397,7 +406,9 @@
                 const description = this.addPlantDescription
                 this.send('POST', '/plants', {name, description}).then(response => {
                     if (response.ok) {
+                        this.getPlantsFromServer()
                         alert('Plant added successfully')
+
                         this.plants.push(response.body)
                         this.modalHandler.hide()
                     }
@@ -420,7 +431,9 @@
                 const description = this.editPlantDescription
                 this.send('PUT', '/plants/' + plantId, {name, description}).then(response => {
                     if (response.ok) {
+                        this.getPlantsFromServer()
                         alert('Plant edited')
+
                         this.plants = this.plants.map(plant => {
                             if (plant.id === plantId) {
                                 return response.body
@@ -436,6 +449,7 @@
                 // Send DELETE /plants/:id
                 this.send('DELETE', '/plants/' + plantId).then(response => {
                     if (response.ok) {
+                        this.getPlantsFromServer()
                         alert('Plant deleted')
                         this.plants = this.plants.filter(plant => plant.id !== plantId)
                         this.modalHandler.hide()

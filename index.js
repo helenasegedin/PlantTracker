@@ -29,7 +29,7 @@ app.use((error, req, res, next) => {
 })
 
 const users = [
-    {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
+     {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
 ]
 
 const plants = [
@@ -54,7 +54,7 @@ const plants = [
 ]
 
 let sessions = [
-       {id: '123', userId: 1}
+        {id: '123', userId: 1}
 ]
 
 function tryToParseJson(jsonString) {
@@ -105,7 +105,6 @@ app.post('/users', async (req, res) => {
     const maxId = users.reduce((maxId, user) => user.id > maxId ? user.id : maxId, 0)
 
     // Save user to database
-    console.log(hashedPassword)
     users.push({id: maxId + 1, email: req.body.email, password: hashedPassword})
 
     res.status(201).end()
@@ -175,7 +174,7 @@ function authorizeRequest(req, res, next) {
 
 }
 
-app.get('/plants', authorizeRequest, (req, res) => {
+app.get('/plants', authorizeRequest, async (req, res) => {
 
     // get plants for user
     const plantsForUser = plants.filter(plant => plant.userId === req.user.id)
@@ -198,7 +197,7 @@ app.post('/plants', authorizeRequest, (req, res) => {
     if (!req.body.name || !req.body.description) return res.status(400).send('Name and description are required')
 
     // Find max id
-    const maxId = plants.reduce((max, plant) => plant.id > max ? plant.id : max, plants[0].id)
+    const maxId = plants.reduce((max, plant) => plant.id > max ? plant.id : max, 0)
 
     // Save plant to database
     const plant = {id: maxId + 1, name: req.body.name, description: req.body.description, userId: req.user.id}
