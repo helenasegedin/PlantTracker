@@ -18,8 +18,8 @@ paths:
             examples:
               User:
                 value:
-                  email: email@example.com
-                  password: pass123
+                  email: helena.segedin@gmail.com
+                  password: pass1234
         required: true
       tags:
         - /users
@@ -116,6 +116,10 @@ paths:
                   value: Authorization header is missing
                 Invalid session id:
                   value: Invalid session id
+                Invalid Authorization header:
+                  value: Invalid Authorization header
+                Invalid user id:
+                  value: Invalid user id
           description: Unauthorized
       security:
         -
@@ -135,7 +139,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Plant'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plant'
           description: Successful response - returns an array of `Plant` entities.
         '400':
           content:
@@ -152,6 +158,10 @@ paths:
                   value: Authorization header is missing
                 Invalid session id:
                   value: Invalid session id
+                Invalid Authorization header:
+                  value: Invalid Authorization header
+                Invalid user id:
+                  value: Invalid user id
           description: Unauthorized
       security:
         -
@@ -165,7 +175,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Plant'
+              type: array
+              items:
+                $ref: '#/components/schemas/Plant'
             examples:
               Plant:
                 value:
@@ -193,13 +205,26 @@ paths:
                 Name is too long:
                   value: Name is too long
           description: Client side error
+        '401':
+          content:
+            text/html:
+              examples:
+                Authorization header is missing:
+                  value: Authorization header is missing
+                Invalid session id:
+                  value: Invalid session id
+                Invalid Authorization header:
+                  value: Invalid Authorization header
+                Invalid user id:
+                  value: Invalid user id
+          description: Unauthorized
       security:
         -
           Bearer: []
       operationId: postPlant
       summary: Add a Plant
       description: Creates a new instance of a `Plant`.
-  '/plants/:id':
+  '/plants/{id}':
     summary: Path used to manage individual plant records.
     put:
       requestBody:
@@ -211,6 +236,14 @@ paths:
         required: true
       tags:
         - '/plants/:id'
+      parameters:
+        -
+          name: id
+          description: Plant to be edited
+          schema:
+            type: integer
+          in: path
+          required: true
       responses:
         '200':
           content:
@@ -225,6 +258,19 @@ paths:
                 Name and description are required:
                   value: Name and description are required
           description: Client side error
+        '401':
+          content:
+            text/html:
+              examples:
+                Authorization header is missing:
+                  value: Authorization header is missing
+                Invalid session id:
+                  value: Invalid session id
+                Invalid Authorization header:
+                  value: Invalid Authorization header
+                Invalid user id:
+                  value: Invalid user id
+          description: Unauthorized
         '403':
           content:
             text/html:
@@ -247,6 +293,14 @@ paths:
     delete:
       tags:
         - '/plants/:id'
+      parameters:
+        -
+          name: id
+          description: Plant to be deleted
+          schema:
+            type: integer
+          in: path
+          required: true
       responses:
         '204':
           description: Successful response
@@ -258,6 +312,10 @@ paths:
                   value: Authorization header is missing
                 Invalid session id:
                   value: Invalid session id
+                Invalid Authorization header:
+                  value: Invalid Authorization header
+                Invalid user id:
+                  value: Invalid user id
           description: Unauthorized
         '403':
           content:
@@ -278,6 +336,14 @@ paths:
           Bearer: []
       summary: Delete a Plant
       description: Deletes a `Plant` record that the user has saved.
+    parameters:
+      -
+        name: id
+        description: Plant to be edited or deleted
+        schema:
+          type: integer
+        in: path
+        required: true
 components:
   schemas:
     User:
