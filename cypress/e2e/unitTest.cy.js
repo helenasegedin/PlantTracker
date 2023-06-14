@@ -6,6 +6,7 @@ describe('Sign Up', () => {
     cy.get('#signUpEmail').type('helena.segedin@gmail.com')
     cy.get('#signUpPassword').type('testpassword')
     cy.get('.modal-footer button').contains('Sign Up').click()
+    cy.wait(1000)
     cy.on('window:alert', (text) => {
       expect(text).to.contains('User created successfully')
     })
